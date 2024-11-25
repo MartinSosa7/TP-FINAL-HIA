@@ -1,11 +1,7 @@
-import { describe, it, expect } from "vitest";
+describe("Prueba controlada para verificar el flujo de despliegue", () => {
+    const resultadoEsperado = true;
 
-describe("test", () => {
-
-    const respuesta = true;
-
-    it("simple test", () => {
-        expect(respuesta).toBe(true)
-    })
-})
-
+    test("Test de prueba", () => {
+        expect(resultadoEsperado).toBe(true);
+    });
+});
