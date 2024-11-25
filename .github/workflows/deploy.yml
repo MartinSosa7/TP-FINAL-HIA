@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'frontend/**' # Cambios en frontend
-      - 'backend/**'  # Cambios en backend
 
 jobs:
   tests:
