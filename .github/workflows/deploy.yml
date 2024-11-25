@@ -40,7 +40,7 @@ jobs:
 
       # 3. Construir imagen del frontend
       - name: Build Frontend Docker Image
-        working-directory: ./tpf-frontend
+        working-directory: ./frontend
         run: |
           docker build -t martinsosa7/frontend:latest .
 
@@ -68,7 +68,7 @@ jobs:
 
       # 3. Construir imagen del backend
       - name: Build Backend Docker Image
-        working-directory: ./tpf-backend
+        working-directory: ./backend
         run: |
           docker build -t martinsosa7/backend:latest .
 
