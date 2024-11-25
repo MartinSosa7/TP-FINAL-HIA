@@ -3,6 +3,9 @@ package ar.edu.unju.fi.tpfinal.entity;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +16,8 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Alquiler {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     private String numeroAlquiler;
@@ -24,11 +29,5 @@ public class Alquiler {
     private Double costoAlquiler;
 
     private LocalDate fechaAlquiler;
-
-    private Cuota cuota;
-
-    private Usuario usuario;
-
-    private Local local;
 
 }
