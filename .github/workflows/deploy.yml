@@ -45,14 +45,12 @@ jobs:
       - name: Build Frontend Docker Image
         working-directory: ./tpf-frontend
         run: |
-          docker build -t cristian241/frontend-app:${{ github.sha }} .
-          docker tag cristian241/frontend-app:${{ github.sha }} cristian241/frontend-app:latest
+          docker build -t martinsosa7/frontend:latest .
 
       # 4. Subir imagen del frontend a Docker Hub
       - name: Push Frontend Docker Image
         run: |
-          docker push cristian241/frontend-app:${{ github.sha }}
-          docker push cristian241/frontend-app:latest
+          docker push martinsosa7/frontend:latest
 
   build-backend:
     name: Build and Deploy Backend
@@ -75,11 +73,9 @@ jobs:
       - name: Build Backend Docker Image
         working-directory: ./tpf-backend
         run: |
-          docker build -t cristian241/backend-app:${{ github.sha }} .
-          docker tag cristian241/backend-app:${{ github.sha }} cristian241/backend-app:latest
+          docker build -t martinsosa7/backend:latest .
 
       # 4. Subir imagen del backend a Docker Hub
       - name: Push Backend Docker Image
         run: |
-          docker push cristian241/backend-app:${{ github.sha }}
-          docker push cristian241/backend-app:latest
+          docker push martinsosa7/backend:latest
