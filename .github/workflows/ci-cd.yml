@@ -64,5 +64,3 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./shopping
           docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
-
-
