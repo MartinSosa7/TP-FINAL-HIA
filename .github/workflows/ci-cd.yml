@@ -1,0 +1,47 @@
+name: Build and Deploy Docker Images
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean verify
+        working-directory: ./shopping # Ajusta según la ubicación de tu backend
+
+      - name: Test Report
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: SpringBoot Report
+          path: ./shopping/target/site/serenity/ # Ajusta según la salida real de tus pruebas
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Backend Image
+        working-directory: ./shopping # Ajusta según la ubicación de tu backend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
