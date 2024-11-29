@@ -9,6 +9,29 @@ on:
       - main
 
 jobs:
+
+  tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Configurar Java
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17' # Cambia la versión según tu proyecto
+          distribution: 'temurin' # O usa otra distribución como zulu, adopt, etc.
+
+      # 3. Ejecutar pruebas
+      - name: Install Dependencies and Run Tests
+        working-directory: ./tpf-backend # Ajusta si tu backend está en otro directorio
+        run: |
+          mvn clean install
+          mvn test
+
   build-backend:
     runs-on: ubuntu-latest
 
