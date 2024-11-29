@@ -61,6 +61,23 @@ services:
       timeout: 5s
       retries: 5
 
+  #phpmyadmin
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql1
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - mysql1
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.99
+    ports:
+      - "9000:80"
+
   backend:
     image: martinsosa7/backend:latest
     container_name: backend
@@ -115,7 +132,7 @@ services:
     environment:
       - DATA_SOURCE_NAME=root:root@tcp(mysql:3306)/"
     ports:
-      - 9104:9104
+      - "9104:9104"
 
   prometheus:
     image: prom/prometheus:latest
