@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s  # Intervalo global de recolección de datos
+  evaluation_interval: 15s  # Intervalo global para evaluar reglas
+
+scrape_configs:
+  - job_name: "mysql-exporter"
+    static_configs:
+      - targets: 
+          - "192.168.0.94:9104"  # Dirección y puerto del MySQL Exporter
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: 
+          - "192.168.0.90:9090"  # Dirección y puerto del propio Prometheus
+
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: 
+          - "192.168.0.81:8080"  # Dirección y puerto del propio Prometheus

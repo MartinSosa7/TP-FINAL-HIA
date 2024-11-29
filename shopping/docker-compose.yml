@@ -1,0 +1,178 @@
+version: '3.7'
+
+services:
+  # Nodo de gestión
+  management1:
+    image: mysql/mysql-cluster:latest
+    container_name: management1
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.2
+    command: ndb_mgmd
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Se puede cambiar si se desea
+    ports:
+      - "1186:1186"  # Puerto para conectarse al nodo de gestión
+
+  # Nodo de datos 1
+  ndb1:
+    image: mysql/mysql-cluster:latest
+    container_name: ndb1
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.3
+    command: ndbd
+    depends_on:
+      - management1
+
+  # Nodo de datos 2
+  ndb2:
+    image: mysql/mysql-cluster:latest
+    container_name: ndb2
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.4
+    command: ndbd
+    depends_on:
+      - management1
+
+  # Nodo MySQL
+
+  mysql1:
+    image: mysql/mysql-cluster:latest
+    container_name: mysql1
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.10
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: products
+    command: mysqld
+    depends_on:
+      - ndb1
+      - ndb2
+    ports:
+      - "4000:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: martinsosa7/backend:latest
+    container_name: backend
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.20
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql1:
+        condition: service_healthy
+
+  frontend:
+    image: martinsosa7/frontend:latest
+    container_name: frontend
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.19
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+
+  backups:
+    image: mysql
+    container_name: backups
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - backup-volume:/var/backups
+      - ./backup.sh:/var/lib/backup.sh
+      - ./.backup.my.cnf:/etc/mysql/conf.d/.my.cnf
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    depends_on:
+      - mysql1
+    entrypoint: ["/bin/bash", "-c", "chmod +x /var/lib/backup.sh && chmod 600 /etc/mysql/conf.d/.my.cnf && while true; do /var/lib/backup.sh; sleep 300; done"]
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.67
+  
+  mysql-exporter:
+    image: bitnami/mysqld-exporter
+    container_name: mysql-exporter
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.94     
+    command: 
+     - --config.my-cnf=/cfg/.my.cnf
+     - --mysqld.address=mysql1:3306
+    volumes:
+      - "./.my.cnf:/cfg/.my.cnf"
+    environment:
+      - DATA_SOURCE_NAME=root:root@tcp(mysql:3306)/"
+    ports:
+      - 9104:9104
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Configuración de Prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.90
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-volume:/var/lib/grafana
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.30
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8081:8080"  # Puerto de cAdvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.81
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+    command: --interval 30 frontend
+    networks:
+      cluster:
+        ipv4_address: 192.168.0.31
+volumes:
+  backup-volume:
+  grafana-volume:
+
+networks:
+  cluster:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "192.168.0.0/16"
