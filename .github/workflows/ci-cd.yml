@@ -22,12 +22,12 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17' # Cambia la versión según tu proyecto
-          distribution: 'temurin' # O usa otra distribución como zulu, adopt, etc.
+          java-version: '17'
+          distribution: 'temurin'
 
       # 3. Ejecutar pruebas
       - name: Install Dependencies and Run Tests
-        working-directory: ./tpf-backend # Ajusta si tu backend está en otro directorio
+        working-directory: ./shopping
         run: |
           mvn clean install
           mvn test
