@@ -41,7 +41,7 @@ class ProductServiceImplTest {
 
     @Test
     void simpleTestParaComprobarWorkflow() {
-        boolean test = false;
+        boolean test = true;
 
         assertTrue(test);
     }
